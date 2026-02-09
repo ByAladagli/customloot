@@ -1,0 +1,1854 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CustomLoot Pro - Gelişmiş Yapılandırma Aracı</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0d1117;
+            --bg-darker: #010409;
+            --bg-card: #161b22;
+            --bg-hover: #1c2128;
+            --accent-cyan: #58a6ff;
+            --accent-purple: #bc8cff;
+            --accent-orange: #ff9470;
+            --accent-green: #56d364;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --border: #30363d;
+            --border-bright: #484f58;
+            --shadow: rgba(0, 0, 0, 0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: var(--bg-darker);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(88, 166, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(188, 140, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(255, 148, 112, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-dark);
+            border-right: 1px solid var(--border);
+            padding: 30px 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 100;
+            animation: slideInLeft 0.5s ease-out;
+        }
+
+        @keyframes slideInLeft {
+            from { transform: translateX(-100%); }
+            to { transform: translateX(0); }
+        }
+
+        .logo {
+            padding: 0 30px 30px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        .logo h1 {
+            font-family: 'Space Mono', monospace;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+        }
+
+        .logo .version {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-family: 'Space Mono', monospace;
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            margin: 5px 15px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .nav-link:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            transform: translateX(5px);
+        }
+
+        .nav-link.active {
+            background: linear-gradient(90deg, rgba(88, 166, 255, 0.15), transparent);
+            color: var(--accent-cyan);
+            border-left: 3px solid var(--accent-cyan);
+        }
+
+        .nav-icon {
+            font-size: 1.2rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 40px;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .header {
+            margin-bottom: 40px;
+        }
+
+        .header h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        /* Action Bar */
+        .action-bar {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            animation: slideDown 0.5s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            color: white;
+            box-shadow: 0 4px 15px rgba(88, 166, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(88, 166, 255, 0.4);
+        }
+
+        .btn-success {
+            background: var(--accent-green);
+            color: var(--bg-dark);
+        }
+
+        .btn-success:hover {
+            background: #46c054;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-bright);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-hover);
+            border-color: var(--accent-cyan);
+        }
+
+        .btn-danger {
+            background: var(--accent-orange);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #ff7a50;
+            transform: translateY(-2px);
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+            animation: scaleIn 0.4s ease-out;
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .card:hover {
+            border-color: var(--border-bright);
+            box-shadow: 0 8px 30px var(--shadow);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: var(--bg-hover);
+            color: var(--text-secondary);
+        }
+
+        .badge.enabled {
+            background: rgba(86, 211, 100, 0.15);
+            color: var(--accent-green);
+        }
+
+        .badge.disabled {
+            background: rgba(139, 148, 158, 0.15);
+            color: var(--text-muted);
+        }
+
+        /* Form Elements */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select,
+        textarea {
+            padding: 12px 16px;
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.1);
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            transition: 0.4s;
+            border-radius: 34px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background: var(--text-secondary);
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background: var(--accent-cyan);
+            border-color: var(--accent-cyan);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+            background: white;
+        }
+
+        /* Item Browser */
+        .item-browser {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 25px;
+        }
+
+        .item-categories {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            height: fit-content;
+        }
+
+        .category-item {
+            padding: 12px 15px;
+            margin-bottom: 5px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--text-secondary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .category-item:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .category-item.active {
+            background: linear-gradient(90deg, rgba(88, 166, 255, 0.15), transparent);
+            color: var(--accent-cyan);
+            border-left: 3px solid var(--accent-cyan);
+        }
+
+        .item-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .item-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .item-card:hover {
+            border-color: var(--accent-cyan);
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px var(--shadow);
+        }
+
+        .item-card.selected {
+            border-color: var(--accent-green);
+            background: rgba(86, 211, 100, 0.1);
+        }
+
+        .item-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--text-primary);
+        }
+
+        .item-shortname {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .item-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .rarity {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .rarity-common { background: rgba(139, 148, 158, 0.2); color: var(--text-secondary); }
+        .rarity-uncommon { background: rgba(86, 211, 100, 0.2); color: var(--accent-green); }
+        .rarity-rare { background: rgba(88, 166, 255, 0.2); color: var(--accent-cyan); }
+        .rarity-legendary { background: rgba(188, 140, 255, 0.2); color: var(--accent-purple); }
+
+        /* Search */
+        .search-box {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding-left: 45px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 1.2rem;
+        }
+
+        /* Loot Table Builder */
+        .loot-table-editor {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 25px;
+        }
+
+        .loot-item {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 1fr 80px;
+            gap: 15px;
+            align-items: center;
+            padding: 15px;
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .loot-item:hover {
+            border-color: var(--accent-cyan);
+        }
+
+        .remove-btn {
+            padding: 8px;
+            background: rgba(255, 148, 112, 0.2);
+            color: var(--accent-orange);
+            border: 1px solid var(--accent-orange);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 600;
+        }
+
+        .remove-btn:hover {
+            background: var(--accent-orange);
+            color: var(--bg-dark);
+        }
+
+        /* JSON Editor */
+        .json-editor {
+            background: #0d1117;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+            color: #c9d1d9;
+            max-height: 600px;
+            overflow: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            position: relative;
+        }
+
+        .json-editor::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .json-editor::-webkit-scrollbar-track {
+            background: var(--bg-dark);
+        }
+
+        .json-editor::-webkit-scrollbar-thumb {
+            background: var(--accent-cyan);
+            border-radius: 5px;
+        }
+
+        /* Stats Dashboard */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--bg-card), var(--bg-dark));
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            animation: popIn 0.5s ease-out;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 10px 30px var(--shadow);
+        }
+
+        .stat-value {
+            font-size: 3rem;
+            font-weight: 700;
+            font-family: 'Space Mono', monospace;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+        }
+
+        /* Notifications */
+        .notification {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            padding: 20px 25px;
+            background: var(--bg-card);
+            border-left: 4px solid var(--accent-green);
+            border-radius: 8px;
+            box-shadow: 0 10px 40px var(--shadow);
+            z-index: 1000;
+            animation: slideInRight 0.5s ease-out;
+            max-width: 400px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(400px); }
+            to { transform: translateX(0); }
+        }
+
+        .notification.error {
+            border-left-color: var(--accent-orange);
+        }
+
+        .notification-icon {
+            font-size: 1.5rem;
+        }
+
+        /* Schema Validator */
+        .schema-status {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .schema-status.valid {
+            background: rgba(86, 211, 100, 0.1);
+            border: 1px solid var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        .schema-status.invalid {
+            background: rgba(255, 148, 112, 0.1);
+            border: 1px solid var(--accent-orange);
+            color: var(--accent-orange);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .item-browser {
+                grid-template-columns: 1fr;
+            }
+
+            .loot-item {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .copy-btn-json {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 8px 16px;
+            background: var(--accent-cyan);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+            z-index: 10;
+        }
+
+        .copy-btn-json:hover {
+            background: var(--accent-purple);
+            transform: scale(1.05);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+        }
+
+        .spinner {
+            border: 3px solid var(--bg-hover);
+            border-top: 3px solid var(--accent-cyan);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .info-box {
+            background: rgba(88, 166, 255, 0.1);
+            border: 1px solid var(--accent-cyan);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-box h4 {
+            color: var(--accent-cyan);
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h1>CustomLoot Pro</h1>
+                <div class="version">v1.2.5 Gelişmiş</div>
+            </div>
+            
+            <nav>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link active" data-page="dashboard">
+                            <span class="nav-icon">📊</span>
+                            Kontrol Paneli
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-page="global">
+                            <span class="nav-icon">⚙️</span>
+                            Genel Ayarlar
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-page="items">
+                            <span class="nav-icon">🎒</span>
+                            Eşya Veritabanı
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-page="loottables">
+                            <span class="nav-icon">📋</span>
+                            Ganimet Tabloları
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-page="corpses">
+                            <span class="nav-icon">💀</span>
+                            NPC Cesetleri
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-page="containers">
+                            <span class="nav-icon">📦</span>
+                            Konteynerler
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-page="export">
+                            <span class="nav-icon">💾</span>
+                            İçe/Dışa Aktar
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Page -->
+            <div id="dashboard" class="page active">
+                <div class="header">
+                    <h2>Kontrol Paneli</h2>
+                    <p>CustomLoot yapılandırmanıza genel bakış</p>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalLootTables">0</div>
+                        <div class="stat-label">Ganimet Tablosu</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalItems">0</div>
+                        <div class="stat-label">Toplam Eşya</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="enabledContainers">0</div>
+                        <div class="stat-label">Aktif Konteyner</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="enabledCorpses">0</div>
+                        <div class="stat-label">Aktif NPC</div>
+                    </div>
+                </div>
+
+                <div class="action-bar">
+                    <button class="btn btn-primary" onclick="newLootTable()">
+                        <span>➕</span> Yeni Ganimet Tablosu
+                    </button>
+                    <button class="btn btn-primary" onclick="importConfig()">
+                        <span>📥</span> Yapılandırma İçe Aktar
+                    </button>
+                    <button class="btn btn-success" onclick="exportConfig()">
+                        <span>💾</span> Yapılandırma Dışa Aktar
+                    </button>
+                    <button class="btn btn-secondary" onclick="validateSchema()">
+                        <span>✓</span> Şemayı Doğrula
+                    </button>
+                </div>
+
+                <div class="info-box">
+                    <h4>🚀 Hızlı Başlangıç</h4>
+                    <p>1. Sol menüden <strong>Ganimet Tabloları</strong>'na gidin ve yeni bir tablo oluşturun</p>
+                    <p>2. <strong>Eşya Veritabanı</strong>'ndan eklemek istediğiniz eşyaları seçin</p>
+                    <p>3. <strong>NPC Cesetleri</strong> ve <strong>Konteynerler</strong> bölümünden hangi ganimet tablosunu kullanacağınızı ayarlayın</p>
+                    <p>4. Tamamlandığında <strong>Yapılandırma Dışa Aktar</strong> butonuna tıklayın</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Hızlı İşlemler</h3>
+                    </div>
+                    <div class="form-grid">
+                        <button class="btn btn-secondary" onclick="navigateTo('global')">Genel Ayarları Yapılandır</button>
+                        <button class="btn btn-secondary" onclick="navigateTo('items')">Eşya Veritabanına Gözat</button>
+                        <button class="btn btn-secondary" onclick="navigateTo('loottables')">Ganimet Tablolarını Yönet</button>
+                        <button class="btn btn-secondary" onclick="resetAllSettings()">Tümünü Sıfırla</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Global Settings Page -->
+            <div id="global" class="page">
+                <div class="header">
+                    <h2>Genel Ayarlar</h2>
+                    <p>CustomLoot için genel davranışı yapılandırın</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Genel Seçenekler</h3>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>Yinelenen Eşyalara İzin Ver</span>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="allowDuplicates">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </label>
+                            <small style="color: var(--text-muted); margin-top: 5px;">Aynı eşyadan birden fazla düşmesine izin verir</small>
+                        </div>
+                        <div class="form-group">
+                            <label style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>Kaynakları En Yakın 10'a Yuvarla</span>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="roundResources">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </label>
+                            <small style="color: var(--text-muted); margin-top: 5px;">Kaynak yığınlarını düzenli hale getirir</small>
+                        </div>
+                        <div class="form-group">
+                            <label style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>Sahipli Konteynerleri Yoksay</span>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="ignoreOwnedContainers">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </label>
+                            <small style="color: var(--text-muted); margin-top: 5px;">Oyuncu kutularını etkilemez</small>
+                        </div>
+                        <div class="form-group">
+                            <label style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>BotReSpawn Profili Başına</span>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="perBotProfile">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </label>
+                            <small style="color: var(--text-muted); margin-top: 5px;">Her bot profili için farklı ayarlar</small>
+                        </div>
+                        <div class="form-group">
+                            <label style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>DM Kutularını Dahil Et</span>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="includeDMCrates">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </label>
+                            <small style="color: var(--text-muted); margin-top: 5px;">Deathmatch modundaki kutuları ekler</small>
+                        </div>
+                        <div class="form-group">
+                            <label style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>Tüm Eşyalar için Skin Göster</span>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="showSkinsAll">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </label>
+                            <small style="color: var(--text-muted); margin-top: 5px;">Tüm eşyalarda skin kullanımına izin verir</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Item Database Page -->
+            <div id="items" class="page">
+                <div class="header">
+                    <h2>Rust Eşya Veritabanı</h2>
+                    <p>Ganimet tablolarınız için eşyalara göz atın ve seçin</p>
+                </div>
+
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="itemSearch" placeholder="Eşya ara..." oninput="filterItems()">
+                </div>
+
+                <div class="item-browser">
+                    <div class="item-categories" id="itemCategories"></div>
+                    <div class="item-grid" id="itemGrid"></div>
+                </div>
+            </div>
+
+            <!-- Loot Tables Page -->
+            <div id="loottables" class="page">
+                <div class="header">
+                    <h2>Ganimet Tabloları</h2>
+                    <p>Özel ganimet tabloları oluşturun ve yönetin</p>
+                </div>
+
+                <div class="action-bar">
+                    <button class="btn btn-primary" onclick="newLootTable()">
+                        <span>➕</span> Yeni Ganimet Tablosu
+                    </button>
+                    <select id="lootTableSelect" onchange="selectLootTable(this.value)" style="padding: 12px; min-width: 200px;">
+                        <option value="">Bir ganimet tablosu seçin...</option>
+                    </select>
+                </div>
+
+                <div id="lootTableEditor" class="loot-table-editor" style="display: none;">
+                    <div class="card-header">
+                        <h3 class="card-title" id="currentLootTableName">Ganimet Tablosu</h3>
+                        <button class="btn btn-danger" onclick="deleteLootTable()">Tabloyu Sil</button>
+                    </div>
+                    <div id="lootItemsList"></div>
+                    <div style="margin-top: 20px;">
+                        <button class="btn btn-primary" onclick="addItemToLootTable()">
+                            <span>➕</span> Eşya Ekle
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NPC Corpses Page -->
+            <div id="corpses" class="page">
+                <div class="header">
+                    <h2>NPC Cesetleri Yapılandırması</h2>
+                    <p>NPC cesetleri için ganimetleri yapılandırın</p>
+                </div>
+
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="corpseSearch" placeholder="NPC türlerinde ara..." oninput="filterCorpses()">
+                </div>
+
+                <div id="corpseList"></div>
+            </div>
+
+            <!-- Containers Page -->
+            <div id="containers" class="page">
+                <div class="header">
+                    <h2>Konteyner Yapılandırması</h2>
+                    <p>Konteynerler ve kutular için ganimetleri yapılandırın</p>
+                </div>
+
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="containerSearch" placeholder="Konteynerlerde ara..." oninput="filterContainers()">
+                </div>
+
+                <div id="containerList"></div>
+            </div>
+
+            <!-- Import/Export Page -->
+            <div id="export" class="page">
+                <div class="header">
+                    <h2>İçe / Dışa Aktar</h2>
+                    <p>Yapılandırmanızı JSON olarak içe veya dışa aktarın</p>
+                </div>
+
+                <div class="action-bar">
+                    <button class="btn btn-primary" onclick="importConfigFromFile()">
+                        <span>📥</span> Dosyadan İçe Aktar
+                    </button>
+                    <button class="btn btn-success" onclick="exportConfig()">
+                        <span>💾</span> Dosyaya Dışa Aktar
+                    </button>
+                    <button class="btn btn-secondary" onclick="copyConfigToClipboard()">
+                        <span>📋</span> Panoya Kopyala
+                    </button>
+                </div>
+
+                <div id="schemaValidation"></div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Yapılandırma JSON</h3>
+                    </div>
+                    <div style="position: relative;">
+                        <button class="copy-btn-json" onclick="copyConfigToClipboard()">📋 Kopyala</button>
+                        <div id="jsonOutput" class="json-editor"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Yapılandırma İçe Aktar</h3>
+                    </div>
+                    <div class="form-group">
+                        <label>JSON Yapılandırmasını Yapıştırın</label>
+                        <textarea id="importJSON" style="min-height: 200px; font-family: 'Space Mono', monospace;" placeholder="CustomLoot JSON yapılandırmanızı buraya yapıştırın..."></textarea>
+                    </div>
+                    <button class="btn btn-primary" onclick="loadFromJSON()" style="margin-top: 15px;">
+                        <span>📥</span> Yapılandırmayı Yükle
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Rust Items Database (Türkçe açıklamalarla)
+        const RUST_ITEMS = {
+  "silahlar": {
+    "rifle.ak": { "name": "Saldırı Tüfeği (AK)", "category": "Silah", "stackSize": 1, "rarity": "rare" },
+    "rifle.lr300": { "name": "LR-300 Saldırı Tüfeği", "category": "Silah", "stackSize": 1, "rarity": "rare" },
+    "rifle.bolt": { "name": "Sürgülü Tüfek", "category": "Silah", "stackSize": 1, "rarity": "rare" },
+    "rifle.semiauto": { "name": "Yarı Otomatik Tüfek", "category": "Silah", "stackSize": 1, "rarity": "uncommon" },
+    "rifle.m39": { "name": "M39 Tüfeği", "category": "Silah", "stackSize": 1, "rarity": "rare" },
+    "smg.mp5": { "name": "MP5A4", "category": "Silah", "stackSize": 1, "rarity": "uncommon" },
+    "smg.thompson": { "name": "Thompson", "category": "Silah", "stackSize": 1, "rarity": "uncommon" },
+    "smg.2": { "name": "Özel SMG", "category": "Silah", "stackSize": 1, "rarity": "uncommon" },
+    "pistol.m92": { "name": "M92 Tabanca", "category": "Silah", "stackSize": 1, "rarity": "uncommon" },
+    "pistol.python": { "name": "Python Altıpatlar", "category": "Silah", "stackSize": 1, "rarity": "uncommon" },
+    "pistol.revolver": { "name": "Altıpatlar", "category": "Silah", "stackSize": 1, "rarity": "common" },
+    "pistol.semiauto": { "name": "Yarı Otomatik Tabanca", "category": "Silah", "stackSize": 1, "rarity": "common" },
+    "shotgun.pump": { "name": "Pompalı Av Tüfeği", "category": "Silah", "stackSize": 1, "rarity": "uncommon" },
+    "shotgun.spas12": { "name": "SPAS-12 Av Tüfeği", "category": "Silah", "stackSize": 1, "rarity": "rare" },
+    "shotgun.double": { "name": "Çift Namlulu Av Tüfeği", "category": "Silah", "stackSize": 1, "rarity": "common" },
+    "bow.hunting": { "name": "Av Yayı", "category": "Silah", "stackSize": 1, "rarity": "common" },
+    "crossbow": { "name": "Tatar Yayı", "category": "Silah", "stackSize": 1, "rarity": "common" },
+    "lmg.m249": { "name": "M249", "category": "Silah", "stackSize": 1, "rarity": "legendary" },
+    "rocket.launcher": { "name": "Roketatar", "category": "Silah", "stackSize": 1, "rarity": "legendary" }
+  },
+  "muhimmat": {
+    "ammo.rifle": { "name": "5.56 Tüfek Mermisi", "category": "Mühimmat", "stackSize": 128, "rarity": "common" },
+    "ammo.rifle.explosive": { "name": "Patlayıcı 5.56 Mermi", "category": "Mühimmat", "stackSize": 128, "rarity": "rare" },
+    "ammo.rifle.hv": { "name": "HV 5.56 Mermi", "category": "Mühimmat", "stackSize": 128, "rarity": "uncommon" },
+    "ammo.rifle.incendiary": { "name": "Yakıcı 5.56 Mermi", "category": "Mühimmat", "stackSize": 128, "rarity": "uncommon" },
+    "ammo.pistol": { "name": "Tabanca Mermisi", "category": "Mühimmat", "stackSize": 128, "rarity": "common" },
+    "ammo.pistol.hv": { "name": "HV Tabanca Mermisi", "category": "Mühimmat", "stackSize": 128, "rarity": "uncommon" },
+    "ammo.shotgun": { "name": "12 Kalibre Saçma", "category": "Mühimmat", "stackSize": 64, "rarity": "common" },
+    "ammo.shotgun.slug": { "name": "12 Kalibre Tek Kurşun", "category": "Mühimmat", "stackSize": 64, "rarity": "uncommon" },
+    "arrow.wooden": { "name": "Tahta Ok", "category": "Mühimmat", "stackSize": 64, "rarity": "common" },
+    "arrow.hv": { "name": "HV Ok", "category": "Mühimmat", "stackSize": 64, "rarity": "uncommon" },
+    "ammo.rocket.basic": { "name": "Roket", "category": "Mühimmat", "stackSize": 3, "rarity": "rare" },
+    "ammo.rocket.hv": { "name": "Yüksek Hızlı Roket", "category": "Mühimmat", "stackSize": 3, "rarity": "rare" }
+  },
+  "kaynaklar": {
+    "wood": { "name": "Odun", "category": "Kaynak", "stackSize": 1000, "rarity": "common" },
+    "stones": { "name": "Taş", "category": "Kaynak", "stackSize": 1000, "rarity": "common" },
+    "metal.ore": { "name": "Metal Cevheri", "category": "Kaynak", "stackSize": 1000, "rarity": "common" },
+    "sulfur.ore": { "name": "Kükürt Cevheri", "category": "Kaynak", "stackSize": 1000, "rarity": "common" },
+    "hq.metal.ore": { "name": "Yüksek Kalite Metal Cevheri", "category": "Kaynak", "stackSize": 1000, "rarity": "uncommon" },
+    "metal.fragments": { "name": "Metal Parçaları", "category": "Kaynak", "stackSize": 1000, "rarity": "common" },
+    "sulfur": { "name": "Kükürt", "category": "Kaynak", "stackSize": 1000, "rarity": "common" },
+    "charcoal": { "name": "Odun Kömürü", "category": "Kaynak", "stackSize": 1000, "rarity": "common" },
+    "cloth": { "name": "Kumaş", "category": "Kaynak", "stackSize": 1000, "rarity": "common" },
+    "leather": { "name": "Deri", "category": "Kaynak", "stackSize": 1000, "rarity": "common" },
+    "fat.animal": { "name": "Hayvan Yağı", "category": "Kaynak", "stackSize": 1000, "rarity": "common" },
+    "bone.fragments": { "name": "Kemik Parçaları", "category": "Kaynak", "stackSize": 1000, "rarity": "common" },
+    "scrap": { "name": "Hurda", "category": "Kaynak", "stackSize": 1000, "rarity": "uncommon" }
+  },
+  "komponentler": {
+    "gears": { "name": "Dişliler", "category": "Komponent", "stackSize": 10, "rarity": "uncommon" },
+    "metal.pipe": { "name": "Metal Boru", "category": "Komponent", "stackSize": 10, "rarity": "uncommon" },
+    "metalspring": { "name": "Metal Yay", "category": "Komponent", "stackSize": 10, "rarity": "uncommon" },
+    "metalblade": { "name": "Metal Bıçak", "category": "Komponent", "stackSize": 10, "rarity": "uncommon" },
+    "propanetank": { "name": "Propan Tankı", "category": "Komponent", "stackSize": 5, "rarity": "uncommon" },
+    "roadsigns": { "name": "Yol İşaretleri", "category": "Komponent", "stackSize": 5, "rarity": "uncommon" },
+    "rope": { "name": "İp", "category": "Komponent", "stackSize": 10, "rarity": "common" },
+    "sewingkit": { "name": "Dikiş Seti", "category": "Komponent", "stackSize": 10, "rarity": "uncommon" },
+    "sheetmetal": { "name": "Levha Metal", "category": "Komponent", "stackSize": 10, "rarity": "uncommon" },
+    "smgbody": { "name": "SMG Gövdesi", "category": "Komponent", "stackSize": 5, "rarity": "rare" },
+    "semibody": { "name": "Yarı Otomatik Gövde", "category": "Komponent", "stackSize": 5, "rarity": "rare" },
+    "riflebody": { "name": "Tüfek Gövdesi", "category": "Komponent", "stackSize": 5, "rarity": "rare" },
+    "techparts": { "name": "Teknoloji Çöpü", "category": "Komponent", "stackSize": 20, "rarity": "rare" },
+    "tarp": { "name": "Branda", "category": "Komponent", "stackSize": 10, "rarity": "uncommon" }
+  },
+  "tibbi": {
+    "syringe.medical": { "name": "Tıbbi Şırınga", "category": "Tıbbi", "stackSize": 10, "rarity": "uncommon" },
+    "largemedkit": { "name": "Büyük İlk Yardım Çantası", "category": "Tıbbi", "stackSize": 3, "rarity": "rare" },
+    "bandage": { "name": "Bandaj", "category": "Tıbbi", "stackSize": 3, "rarity": "common" },
+    "antiradpills": { "name": "Radyasyon Önleyici Hap", "category": "Tıbbi", "stackSize": 10, "rarity": "uncommon" },
+    "blood": { "name": "Kan", "category": "Tıbbi", "stackSize": 1, "rarity": "uncommon" }
+  },
+  "yiyecek": {
+    "apple": { "name": "Elma", "category": "Yiyecek", "stackSize": 10, "rarity": "common" },
+    "corn": { "name": "Mısır", "category": "Yiyecek", "stackSize": 20, "rarity": "common" },
+    "mushroom": { "name": "Mantar", "category": "Yiyecek", "stackSize": 10, "rarity": "common" },
+    "meat.boar": { "name": "Çiğ Ayı Eti", "category": "Yiyecek", "stackSize": 20, "rarity": "common" },
+    "meat.pork.cooked": { "name": "Pişmiş Domuz Eti", "category": "Yiyecek", "stackSize": 20, "rarity": "common" },
+    "can.beans": { "name": "Fasulye Konservesi", "category": "Yiyecek", "stackSize": 10, "rarity": "common" },
+    "can.tuna": { "name": "Ton Balığı Konservesi", "category": "Yiyecek", "stackSize": 10, "rarity": "common" },
+    "water": { "name": "Su", "category": "Yiyecek", "stackSize": 1, "rarity": "common" },
+    "water.salt": { "name": "Tuzlu Su", "category": "Yiyecek", "stackSize": 1, "rarity": "common" }
+  },
+  "giysiler": {
+    "metal.facemask": { "name": "Metal Yüz Maskesi", "category": "Giysi", "stackSize": 1, "rarity": "rare" },
+    "metal.plate.torso": { "name": "Metal Göğüs Zırhı", "category": "Giysi", "stackSize": 1, "rarity": "rare" },
+    "roadsign.jacket": { "name": "Yol İşareti Ceket", "category": "Giysi", "stackSize": 1, "rarity": "uncommon" },
+    "roadsign.kilt": { "name": "Yol İşareti Etek", "category": "Giysi", "stackSize": 1, "rarity": "uncommon" },
+    "hoodie": { "name": "Kapüşonlu", "category": "Giysi", "stackSize": 1, "rarity": "common" },
+    "pants": { "name": "Pantolon", "category": "Giysi", "stackSize": 1, "rarity": "common" },
+    "shoes.boots": { "name": "Botlar", "category": "Giysi", "stackSize": 1, "rarity": "common" },
+    "riot.helmet": { "name": "Ayaklanma Başlığı", "category": "Giysi", "stackSize": 1, "rarity": "rare" },
+    "coffeecan.helmet": { "name": "Kahve Tenekesi Miğfer", "category": "Giysi", "stackSize": 1, "rarity": "uncommon" },
+    "tactical.gloves": { "name": "Taktik Eldiven", "category": "Giysi", "stackSize": 1, "rarity": "uncommon" },
+    "hazmatsuit": { "name": "Tehlikeli Madde Kıyafeti", "category": "Giysi", "stackSize": 1, "rarity": "uncommon" }
+  },
+  "aletler": {
+    "hammer": { "name": "Çekiç", "category": "Alet", "stackSize": 1, "rarity": "common" },
+    "hatchet": { "name": "Balta", "category": "Alet", "stackSize": 1, "rarity": "common" },
+    "pickaxe": { "name": "Kazma", "category": "Alet", "stackSize": 1, "rarity": "common" },
+    "axe.salvaged": { "name": "Hurda Balta", "category": "Alet", "stackSize": 1, "rarity": "uncommon" },
+    "icepick.salvaged": { "name": "Hurda Buz Kıracağı", "category": "Alet", "stackSize": 1, "rarity": "uncommon" },
+    "chainsaw": { "name": "Motorlu Testere", "category": "Alet", "stackSize": 1, "rarity": "rare" },
+    "jackhammer": { "name": "Kırıcı", "category": "Alet", "stackSize": 1, "rarity": "rare" }
+  },
+  "patlayicilar": {
+    "explosive.timed": { "name": "Zamanlı Patlayıcı", "category": "Patlayıcı", "stackSize": 10, "rarity": "legendary" },
+    "explosive.satchel": { "name": "Çanta Patlayıcı", "category": "Patlayıcı", "stackSize": 10, "rarity": "rare" },
+    "grenade.f1": { "name": "F1 El Bombası", "category": "Patlayıcı", "stackSize": 5, "rarity": "uncommon" },
+    "grenade.beancan": { "name": "Teneke El Bombası", "category": "Patlayıcı", "stackSize": 15, "rarity": "common" },
+    "survey.charge": { "name": "Araştırma Patlayıcısı", "category": "Alet", "stackSize": 20, "rarity": "common" }
+  },
+  "elektrik": {
+    "electric.battery.small": { "name": "Küçük Şarj Edilebilir Pil", "category": "Elektrik", "stackSize": 5, "rarity": "uncommon" },
+    "electric.generator.small": { "name": "Küçük Jeneratör", "category": "Elektrik", "stackSize": 5, "rarity": "uncommon" },
+    "targeting.computer": { "name": "Hedefleme Bilgisayarı", "category": "Elektrik", "stackSize": 5, "rarity": "rare" },
+    "cctv.camera": { "name": "CCTV Kamera", "category": "Elektrik", "stackSize": 64, "rarity": "uncommon" }
+  },
+  "diger": {
+    "keycard_red": { "name": "Kırmızı Kart", "category": "Eşya", "stackSize": 1, "rarity": "legendary" },
+    "keycard_blue": { "name": "Mavi Kart", "category": "Eşya", "stackSize": 1, "rarity": "rare" },
+    "keycard_green": { "name": "Yeşil Kart", "category": "Eşya", "stackSize": 1, "rarity": "uncommon" },
+    "fuse": { "name": "Sigorta", "category": "Eşya", "stackSize": 5, "rarity": "uncommon" },
+    "lowgradefuel": { "name": "Düşük Kalite Yakıt", "category": "Kaynak", "stackSize": 500, "rarity": "common" },
+    "crude.oil": { "name": "Ham Petrol", "category": "Kaynak", "stackSize": 500, "rarity": "common" },
+    "explosives": { "name": "Patlayıcılar", "category": "Kaynak", "stackSize": 1000, "rarity": "uncommon" },
+    "gunpowder": { "name": "Barut", "category": "Kaynak", "stackSize": 1000, "rarity": "common" }
+  }
+};
+
+        // Configuration State
+        let config = {
+            GlobalSettings: {
+                allowDuplicates: false,
+                RoundResourcesStacksDownToNearestTen: true,
+                IgnoreContainersWithOwnerID: true,
+                corpseTypePerBotReSpawnProfile: false,
+                Include_DM_Crates: false,
+                Show_Skins_For_All_Items: false,
+                AllowSkinsFor: ["note"]
+            },
+            LootTables: {
+                "varsayilan": []
+            },
+            CorpseTypes: {},
+            ContainerTypes: {}
+        };
+
+        let currentLootTable = "varsayilan";
+        let selectedCategory = "silahlar";
+
+        const defaultCorpseTypes = [
+            "Excavator", "OilRig", "CompoundScientist", "BanditTown", "MountedScientist",
+            "JunkPileScientist", "DungeonScarecrow", "ScareCrow", "MilitaryTunnelScientist",
+            "CargoShip", "HeavyScientist", "JungleScientist", "APCScientist", "Scientist"
+        ];
+
+        const defaultContainerTypes = [
+            "crate_normal", "crate_elite", "crate_basic", "barrel", "oil_barrel",
+            "foodbox", "vehicle_parts", "supply_drop", "heli_crate", "bradley_crate"
+        ];
+
+        const rarityTranslations = {
+            'common': 'Yaygın',
+            'uncommon': 'Nadir',
+            'rare': 'Çok Nadir',
+            'legendary': 'Efsanevi'
+        };
+
+        // Initialize
+        function init() {
+            initializeCorpses();
+            initializeContainers();
+            initializeNavigation();
+            bindGlobalSettings();
+            renderItemDatabase();
+            updateStats();
+            updateJSONOutput();
+            renderLootTables();
+            renderCorpseList();
+            renderContainerList();
+        }
+
+        function initializeCorpses() {
+            defaultCorpseTypes.forEach(type => {
+                config.CorpseTypes[type] = {
+                    enabled: false,
+                    lootTable: "varsayilan",
+                    maxItems: 6,
+                    minItems: 6,
+                    gunsWithAmmo: false,
+                    noGuns: false,
+                    MaxBps: 3,
+                    WaterPreFillPercent: 20,
+                    ClearContainerFirst: true
+                };
+            });
+        }
+
+        function initializeContainers() {
+            defaultContainerTypes.forEach(type => {
+                config.ContainerTypes[type] = {
+                    enabled: false,
+                    lootTable: "varsayilan",
+                    maxItems: 6,
+                    minItems: 6,
+                    gunsWithAmmo: false,
+                    noGuns: false,
+                    MaxBps: 3,
+                    WaterPreFillPercent: 20,
+                    ClearContainerFirst: true
+                };
+            });
+        }
+
+        // Navigation
+        function initializeNavigation() {
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const page = link.dataset.page;
+                    navigateTo(page);
+                });
+            });
+        }
+
+        function navigateTo(page) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            
+            document.getElementById(page).classList.add('active');
+            document.querySelector(`[data-page="${page}"]`).classList.add('active');
+        }
+
+        // Global Settings
+        function bindGlobalSettings() {
+            const settings = [
+                'allowDuplicates',
+                'roundResources',
+                'ignoreOwnedContainers',
+                'perBotProfile',
+                'includeDMCrates',
+                'showSkinsAll'
+            ];
+
+            settings.forEach(setting => {
+                const element = document.getElementById(setting);
+                if (element) {
+                    const configKey = {
+                        'allowDuplicates': 'allowDuplicates',
+                        'roundResources': 'RoundResourcesStacksDownToNearestTen',
+                        'ignoreOwnedContainers': 'IgnoreContainersWithOwnerID',
+                        'perBotProfile': 'corpseTypePerBotReSpawnProfile',
+                        'includeDMCrates': 'Include_DM_Crates',
+                        'showSkinsAll': 'Show_Skins_For_All_Items'
+                    }[setting];
+
+                    element.checked = config.GlobalSettings[configKey];
+                    element.addEventListener('change', () => {
+                        config.GlobalSettings[configKey] = element.checked;
+                        updateJSONOutput();
+                        showNotification('Ayarlar güncellendi', 'success');
+                    });
+                }
+            });
+        }
+
+        // Item Database
+        function renderItemDatabase() {
+            const categoriesDiv = document.getElementById('itemCategories');
+            const gridDiv = document.getElementById('itemGrid');
+
+            // Render categories
+            categoriesDiv.innerHTML = '';
+            Object.keys(RUST_ITEMS).forEach(category => {
+                const count = Object.keys(RUST_ITEMS[category]).length;
+                const div = document.createElement('div');
+                div.className = `category-item ${category === selectedCategory ? 'active' : ''}`;
+                div.innerHTML = `
+                    <span>${category.charAt(0).toUpperCase() + category.slice(1)}</span>
+                    <span class="badge">${count}</span>
+                `;
+                div.onclick = () => {
+                    selectedCategory = category;
+                    renderItemDatabase();
+                };
+                categoriesDiv.appendChild(div);
+            });
+
+            // Render items
+            renderItemGrid();
+        }
+
+        function renderItemGrid(searchTerm = '') {
+            const gridDiv = document.getElementById('itemGrid');
+            gridDiv.innerHTML = '';
+
+            const items = RUST_ITEMS[selectedCategory];
+            Object.entries(items).forEach(([shortname, item]) => {
+                if (searchTerm && !item.name.toLowerCase().includes(searchTerm.toLowerCase()) && 
+                    !shortname.toLowerCase().includes(searchTerm.toLowerCase())) {
+                    return;
+                }
+
+                const card = document.createElement('div');
+                card.className = 'item-card';
+                card.innerHTML = `
+                    <div class="item-name">${item.name}</div>
+                    <div class="item-shortname">${shortname}</div>
+                    <div class="item-meta">
+                        <span class="rarity rarity-${item.rarity}">${rarityTranslations[item.rarity]}</span>
+                        <span>×${item.stackSize}</span>
+                    </div>
+                `;
+                card.onclick = () => selectItem(shortname, item);
+                gridDiv.appendChild(card);
+            });
+        }
+
+        function filterItems() {
+            const searchTerm = document.getElementById('itemSearch').value;
+            renderItemGrid(searchTerm);
+        }
+
+        function selectItem(shortname, item) {
+            console.log('Seçildi:', shortname, item);
+            showNotification(`Seçildi: ${item.name}`, 'success');
+        }
+
+        // Loot Tables
+        function renderLootTables() {
+            const select = document.getElementById('lootTableSelect');
+            select.innerHTML = '<option value="">Bir ganimet tablosu seçin...</option>';
+            
+            Object.keys(config.LootTables).forEach(tableName => {
+                const option = document.createElement('option');
+                option.value = tableName;
+                option.textContent = tableName;
+                select.appendChild(option);
+            });
+        }
+
+        function newLootTable() {
+            const name = prompt('Ganimet tablosu adı girin:');
+            if (name && !config.LootTables[name]) {
+                config.LootTables[name] = [];
+                renderLootTables();
+                updateStats();
+                updateJSONOutput();
+                showNotification(`"${name}" ganimet tablosu oluşturuldu!`, 'success');
+            } else if (config.LootTables[name]) {
+                showNotification('Bu isimde bir tablo zaten mevcut!', 'error');
+            }
+        }
+
+        function selectLootTable(name) {
+            if (!name) {
+                document.getElementById('lootTableEditor').style.display = 'none';
+                return;
+            }
+            currentLootTable = name;
+            document.getElementById('currentLootTableName').textContent = name;
+            document.getElementById('lootTableEditor').style.display = 'block';
+            renderLootTableItems();
+        }
+
+        function renderLootTableItems() {
+            const list = document.getElementById('lootItemsList');
+            list.innerHTML = '';
+            
+            const items = config.LootTables[currentLootTable] || [];
+            
+            if (items.length === 0) {
+                list.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-muted);">Henüz eşya eklenmedi. "Eşya Ekle" butonuna tıklayarak başlayın.</div>';
+                return;
+            }
+            
+            items.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'loot-item';
+                div.innerHTML = `
+                    <input type="text" value="${item.shortname || ''}" placeholder="Eşya kısa adı (örn: rifle.ak)" onchange="updateLootItem(${index}, 'shortname', this.value)">
+                    <input type="number" value="${item.amount || 1}" placeholder="Miktar" min="1" onchange="updateLootItem(${index}, 'amount', this.value)">
+                    <input type="number" value="${item.probability || 100}" placeholder="Olasılık %" min="0" max="100" onchange="updateLootItem(${index}, 'probability', this.value)">
+                    <input type="number" value="${item.minCondition || 0}" placeholder="Min %" min="0" max="100" onchange="updateLootItem(${index}, 'minCondition', this.value)">
+                    <input type="number" value="${item.maxCondition || 100}" placeholder="Max %" min="0" max="100" onchange="updateLootItem(${index}, 'maxCondition', this.value)">
+                    <button class="remove-btn" onclick="removeFromLootTable(${index})">✕</button>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function updateLootItem(index, field, value) {
+            if (field === 'amount' || field === 'probability' || field === 'minCondition' || field === 'maxCondition') {
+                value = parseInt(value);
+            }
+            config.LootTables[currentLootTable][index][field] = value;
+            updateJSONOutput();
+        }
+
+        function addItemToLootTable() {
+            if (!currentLootTable) return;
+            
+            config.LootTables[currentLootTable].push({
+                shortname: '',
+                amount: 1,
+                probability: 100,
+                minCondition: 0,
+                maxCondition: 100
+            });
+            
+            renderLootTableItems();
+            updateJSONOutput();
+            showNotification('Yeni eşya eklendi', 'success');
+        }
+
+        function removeFromLootTable(index) {
+            if (confirm('Bu eşyayı silmek istediğinizden emin misiniz?')) {
+                config.LootTables[currentLootTable].splice(index, 1);
+                renderLootTableItems();
+                updateJSONOutput();
+                showNotification('Eşya silindi', 'success');
+            }
+        }
+
+        function deleteLootTable() {
+            if (currentLootTable === 'varsayilan') {
+                showNotification('Varsayılan tabloyu silemezsiniz!', 'error');
+                return;
+            }
+            
+            if (confirm(`"${currentLootTable}" ganimet tablosunu silmek istediğinizden emin misiniz?`)) {
+                delete config.LootTables[currentLootTable];
+                currentLootTable = "varsayilan";
+                document.getElementById('lootTableEditor').style.display = 'none';
+                renderLootTables();
+                updateStats();
+                updateJSONOutput();
+                showNotification('Ganimet tablosu silindi', 'success');
+            }
+        }
+
+        // Corpses & Containers
+        function renderCorpseList() {
+            const list = document.getElementById('corpseList');
+            list.innerHTML = '';
+            
+            Object.entries(config.CorpseTypes).forEach(([name, settings]) => {
+                list.appendChild(createSettingsCard(name, settings, 'corpse'));
+            });
+        }
+
+        function renderContainerList() {
+            const list = document.getElementById('containerList');
+            list.innerHTML = '';
+            
+            Object.entries(config.ContainerTypes).forEach(([name, settings]) => {
+                list.appendChild(createSettingsCard(name, settings, 'container'));
+            });
+        }
+
+        function createSettingsCard(name, settings, type) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.dataset.name = name.toLowerCase();
+
+            const badgeClass = settings.enabled ? 'enabled' : 'disabled';
+            const badgeText = settings.enabled ? 'Aktif' : 'Pasif';
+
+            card.innerHTML = `
+                <div class="card-header">
+                    <h3 class="card-title">${name}</h3>
+                    <span class="badge ${badgeClass}">${badgeText}</span>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>Etkin</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="${type}-${name}-enabled" ${settings.enabled ? 'checked' : ''}>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>Ganimet Tablosu</label>
+                        <select id="${type}-${name}-lootTable">
+                            ${Object.keys(config.LootTables).map(table => 
+                                `<option value="${table}" ${settings.lootTable === table ? 'selected' : ''}>${table}</option>`
+                            ).join('')}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Min Eşya Sayısı</label>
+                        <input type="number" id="${type}-${name}-minItems" value="${settings.minItems}" min="0" max="48">
+                    </div>
+                    <div class="form-group">
+                        <label>Max Eşya Sayısı</label>
+                        <input type="number" id="${type}-${name}-maxItems" value="${settings.maxItems}" min="0" max="48">
+                    </div>
+                    <div class="form-group">
+                        <label>Max Blueprint</label>
+                        <input type="number" id="${type}-${name}-MaxBps" value="${settings.MaxBps}" min="0" max="10">
+                    </div>
+                    <div class="form-group">
+                        <label>Su Doldurma %</label>
+                        <input type="number" id="${type}-${name}-WaterPreFillPercent" value="${settings.WaterPreFillPercent}" min="0" max="100">
+                    </div>
+                    <div class="form-group">
+                        <label style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>Mühimmatlı Silahlar</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="${type}-${name}-gunsWithAmmo" ${settings.gunsWithAmmo ? 'checked' : ''}>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>Silah Yok</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="${type}-${name}-noGuns" ${settings.noGuns ? 'checked' : ''}>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>Önce Konteyneri Temizle</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="${type}-${name}-ClearContainerFirst" ${settings.ClearContainerFirst ? 'checked' : ''}>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </label>
+                    </div>
+                </div>
+            `;
+
+            // Add event listeners
+            card.querySelectorAll('input, select').forEach(input => {
+                input.addEventListener('change', () => updateSettings(name, type));
+            });
+
+            return card;
+        }
+
+        function updateSettings(name, type) {
+            const target = type === 'corpse' ? config.CorpseTypes : config.ContainerTypes;
+            
+            target[name] = {
+                enabled: document.getElementById(`${type}-${name}-enabled`).checked,
+                lootTable: document.getElementById(`${type}-${name}-lootTable`).value,
+                minItems: parseInt(document.getElementById(`${type}-${name}-minItems`).value),
+                maxItems: parseInt(document.getElementById(`${type}-${name}-maxItems`).value),
+                gunsWithAmmo: document.getElementById(`${type}-${name}-gunsWithAmmo`).checked,
+                noGuns: document.getElementById(`${type}-${name}-noGuns`).checked,
+                MaxBps: parseInt(document.getElementById(`${type}-${name}-MaxBps`).value),
+                WaterPreFillPercent: parseInt(document.getElementById(`${type}-${name}-WaterPreFillPercent`).value),
+                ClearContainerFirst: document.getElementById(`${type}-${name}-ClearContainerFirst`).checked
+            };
+
+            updateStats();
+            updateJSONOutput();
+            
+            if (type === 'corpse') {
+                renderCorpseList();
+            } else {
+                renderContainerList();
+            }
+        }
+
+        function filterCorpses() {
+            const searchTerm = document.getElementById('corpseSearch').value.toLowerCase();
+            document.querySelectorAll('#corpseList .card').forEach(card => {
+                card.style.display = card.dataset.name.includes(searchTerm) ? 'block' : 'none';
+            });
+        }
+
+        function filterContainers() {
+            const searchTerm = document.getElementById('containerSearch').value.toLowerCase();
+            document.querySelectorAll('#containerList .card').forEach(card => {
+                card.style.display = card.dataset.name.includes(searchTerm) ? 'block' : 'none';
+            });
+        }
+
+        // Stats
+        function updateStats() {
+            const totalTables = Object.keys(config.LootTables).length;
+            const totalItems = Object.values(config.LootTables).reduce((sum, table) => sum + table.length, 0);
+            const enabledContainers = Object.values(config.ContainerTypes).filter(c => c.enabled).length;
+            const enabledCorpses = Object.values(config.CorpseTypes).filter(c => c.enabled).length;
+
+            document.getElementById('totalLootTables').textContent = totalTables;
+            document.getElementById('totalItems').textContent = totalItems;
+            document.getElementById('enabledContainers').textContent = enabledContainers;
+            document.getElementById('enabledCorpses').textContent = enabledCorpses;
+        }
+
+        // JSON
+        function updateJSONOutput() {
+            const output = document.getElementById('jsonOutput');
+            if (output) {
+                output.textContent = JSON.stringify(config, null, 2);
+            }
+        }
+
+        // Import/Export
+        function exportConfig() {
+            const dataStr = JSON.stringify(config, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const link = document.createElement('a');
+            link.setAttribute('href', dataUri);
+            link.setAttribute('download', 'CustomLoot_Config.json');
+            link.click();
+            
+            showNotification('Yapılandırma başarıyla dışa aktarıldı!', 'success');
+        }
+
+        function importConfigFromFile() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            
+            input.onchange = e => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = event => {
+                    try {
+                        config = JSON.parse(event.target.result);
+                        init();
+                        showNotification('Yapılandırma başarıyla içe aktarıldı!', 'success');
+                    } catch (error) {
+                        showNotification('Hata: ' + error.message, 'error');
+                    }
+                };
+                
+                reader.readAsText(file);
+            };
+            
+            input.click();
+        }
+
+        function importConfig() {
+            importConfigFromFile();
+        }
+
+        function loadFromJSON() {
+            try {
+                const jsonText = document.getElementById('importJSON').value;
+                config = JSON.parse(jsonText);
+                init();
+                showNotification('Yapılandırma yüklendi!', 'success');
+            } catch (error) {
+                showNotification('Hata: ' + error.message, 'error');
+            }
+        }
+
+        function copyConfigToClipboard() {
+            const text = JSON.stringify(config, null, 2);
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification('Panoya kopyalandı!', 'success');
+            });
+        }
+
+        // Schema Validation
+        function validateSchema() {
+            const validation = document.getElementById('schemaValidation');
+            if (!validation) return;
+
+            try {
+                // Basic validation
+                if (!config.GlobalSettings) throw new Error('GlobalSettings eksik');
+                if (!config.CorpseTypes) throw new Error('CorpseTypes eksik');
+                if (!config.ContainerTypes) throw new Error('ContainerTypes eksik');
+                if (!config.LootTables) throw new Error('LootTables eksik');
+                
+                validation.innerHTML = `
+                    <div class="schema-status valid">
+                        <span style="font-size: 1.5rem;">✓</span>
+                        <div>
+                            <strong>Şema Geçerli</strong>
+                            <p>Yapılandırma yapısı doğru</p>
+                        </div>
+                    </div>
+                `;
+                showNotification('Şema doğrulaması başarılı!', 'success');
+            } catch (error) {
+                validation.innerHTML = `
+                    <div class="schema-status invalid">
+                        <span style="font-size: 1.5rem;">✗</span>
+                        <div>
+                            <strong>Şema Geçersiz</strong>
+                            <p>${error.message}</p>
+                        </div>
+                    </div>
+                `;
+                showNotification('Şema doğrulaması başarısız!', 'error');
+            }
+        }
+
+        // Reset
+        function resetAllSettings() {
+            if (confirm('Tüm ayarları varsayılana döndürmek istediğinizden emin misiniz? Bu işlem geri alınamaz.')) {
+                config = {
+                    GlobalSettings: {
+                        allowDuplicates: false,
+                        RoundResourcesStacksDownToNearestTen: true,
+                        IgnoreContainersWithOwnerID: true,
+                        corpseTypePerBotReSpawnProfile: false,
+                        Include_DM_Crates: false,
+                        Show_Skins_For_All_Items: false,
+                        AllowSkinsFor: ["note"]
+                    },
+                    LootTables: {
+                        "varsayilan": []
+                    },
+                    CorpseTypes: {},
+                    ContainerTypes: {}
+                };
+                init();
+                showNotification('Tüm ayarlar sıfırlandı', 'success');
+            }
+        }
+
+        // Notifications
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <span class="notification-icon">${type === 'success' ? '✓' : '⚠'}</span>
+                <div>${message}</div>
+            `;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.animation = 'slideInRight 0.5s ease-out reverse';
+                setTimeout(() => notification.remove(), 500);
+            }, 3000);
+        }
+
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>
